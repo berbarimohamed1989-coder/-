@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متجر بطاقات NFC - الجزائر</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+header {
+    background-color: #1e90ff;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+h1 { margin: 0; }
+.container {
+    max-width: 950px;
+    margin: 20px auto;
+    padding: 0 20px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+}
+label { display: block; margin-top: 15px; }
+input, select, textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+button:hover { background-color: #218838; }
+.total-price { font-weight: bold; margin-top: 15px; font-size: 18px; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>متجر بطاقات NFC - الجزائر</h1>
+    <p>أدخل بياناتك لشراء بطاقتك بسهولة</p>
+</header>
+
+<div class="container">
+<form id="nfcForm">
+    <label>الاسم الكامل:</label>
+    <input type="text" name="fullname" required>
+
+    <label>رقم الهاتف:</label>
+    <input type="text" name="phone" required>
+
+    <label>البريد الإلكتروني:</label>
+    <input type="email" name="email" required>
+
+    <label>رابط واتساب (اختياري):</label>
+    <input type="text" name="whatsapp">
+
+    <label>رابط فيسبوك (اختياري):</label>
+    <input type="text" name="facebook">
+
+    <label>روابط إضافية (اختياري):</label>
+    <textarea name="otherlinks" placeholder="يمكنك إضافة روابط أخرى"></textarea>
+
+    <label>اختر نوع البطاقة:</label>
+    <select id="cardType" name="cardType" required>
+        <option value="">-- اختر النوع --</option>
+        <option value="single">بطاقة NFC عادية - 2000 دج</option>
+        <option value="double">بطاقتين عادية - 3500 دج</option>
+        <option value="simple">بطاقة بسيطة - 190 دج</option>
+        <option value="custom">بطاقة معدلة مع تصميم/لوغو خاص - 2900 دج</option>
+    </select>
+
+    <label>اختر الولاية:</label>
+    <select id="state" required>
+        <option value="">-- اختر الولاية --</option>
+        <option value="algiers">الجزائر العاصمة</option>
+        <option value="oran">وهران</option>
+        <option value="constantine">قسنطينة</option>
+        <option value="annaba">عنابة</option>
+        <option value="batna">باتنة</option>
+        <option value="bejaia">بجاية</option>
+        <option value="blida">البليدة</option>
+        <option value="setif">سطيف</option>
+        <option value="tlemcen">تلمسان</option>
+        <option value="skikda">سكيكدة</option>
+        <!-- يمكن إضافة كل الولايات الأخرى هنا -->
+    </select>
+
+    <label>اختر البلدية:</label>
+    <select id="city" required>
+        <option value="">-- اختر البلدية --</option>
+    </select>
+
+    <div class="total-price" id="priceDisplay">السعر: 0 دج</div>
+
+    <button type="button" onclick="sendWhatsApp()">اطلب عبر واتساب</button>
+</form>
+</div>
+
+<script>
+// مثال على البلديات، يمكن استكمال كل الولايات الجزائرية
+const cities = {
+    algiers: ["الدار البيضاء","باب الوادي","عين البنيان"],
+    oran: ["حاسي بن عبد الله","باب الواد","عين الترك"],
+    constantine: ["الخروب","الحامة","قسنطينة"],
+    annaba: ["عين البنيان","الشط","باب الزوار"],
+    batna: ["باتنة","أيت عباس","أولاد فارس"],
+    bejaia: ["بجاية","تيكجدة","القصبة"],
+    blida: ["البليدة","البومال","وادي السمار"],
+    setif: ["سطيف","عين الكبيرة","القصر"],
+    tlemcen: ["تلمسان","بني صاف","العين الكردي"],
+    skikda: ["سكيكدة","قالمة","السطاح"],
+    // اكمل بقية الولايات حسب الحاجة
+};
+
+document.getElementById("state").addEventListener("change", function() {
+    const state = this.value;
+    const citySelect = document.getElementById("city");
+    citySelect.innerHTML = '<option value="">-- اختر البلدية --</option>';
+    if(cities[state]){
+        cities[state].forEach(city => {
+            const option = document.createElement("option");
+            option.value = city;
+            option.text = city;
+            citySelect.add(option);
+        });
+    }
+});
+
+// حساب السعر تلقائياً
+document.getElementById("cardType").addEventListener("change", function(){
+    let price = 0;
+    switch(this.value){
+        case "single": price = 2000; break;
+        case "double": price = 3500; break;
+        case "simple": price = 190; break;
+        case "custom": price = 2900; break;
+    }
+    document.getElementById("priceDisplay").innerText = "السعر: " + price + " دج";
+});
+
+// إرسال الطلب عبر واتساب
+function sendWhatsApp(){
+    const form = document.getElementById("nfcForm");
+    const fullname = form.fullname.value;
+    const phone = form.phone.value;
+    const email = form.email.value;
+    const whatsappLink = form.whatsapp.value;
+    const facebook = form.facebook.value;
+    const otherlinks = form.otherlinks.value;
+    const cardType = form.cardType.value;
+    const state = document.getElementById("state").value;
+    const city = document.getElementById("city").value;
+
+    let cardName = "";
+    switch(cardType){
+        case "single": cardName="بطاقة NFC عادية"; break;
+        case "double": cardName="بطاقتين عادية"; break;
+        case "simple": cardName="بطاقة بسيطة"; break;
+        case "custom": cardName="بطاقة معدلة مع تصميم/لوغو خاص"; break;
+    }
+
+    const message = `طلب بطاقة NFC\nالاسم: ${fullname}\nالهاتف: ${phone}\nالبريد الإلكتروني: ${email}\nواتساب: ${whatsappLink}\nفيسبوك: ${facebook}\nروابط إضافية: ${otherlinks}\nنوع البطاقة: ${cardName}\nالولاية: ${state}\nالبلدية: ${city}`;
+    
+    // رقمك للواتساب
+    const yourNumber = "213770984554";
+    const url = `https://wa.me/${yourNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+}
+</script>
+
+</body>
+</html>
